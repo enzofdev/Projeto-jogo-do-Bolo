@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#fff8ec" />
+  <title>O Desafio do Bolo Perfeito</title>
+  <link rel="shortcut icon" href="imagem.ico" type="image/x-icon">
+  <style>
+    :root {
+      --cream: #fff8ec;
+      --paper: #fffdf8;
+      --ink: #3d2b2e;
+      --muted: #846f6a;
+      --pink: #ef6f8e;
+      --pink-dark: #cc4669;
+      --yellow: #ffd166;
+      --mint: #82d7b4;
+      --purple: #8b78d9;
+      --line: #eaded0;
+      --shadow: 0 18px 45px rgba(100, 56, 37, .14);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 9% 12%, rgba(255, 209, 102, .32) 0 5%, transparent 5.2%),
+        radial-gradient(circle at 92% 82%, rgba(130, 215, 180, .22) 0 7%, transparent 7.2%),
+        var(--cream);
+      font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+    }
+
+    button { font: inherit; }
+    .app { width: min(1120px, calc(100% - 28px)); margin: 0 auto; padding: 28px 0 42px; }
+    .topbar { display: flex; justify-content: space-between; align-items: center; gap: 18px; margin-bottom: 22px; }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-mark { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 18px; background: var(--pink); color: white; font-size: 28px; box-shadow: 5px 5px 0 #d95474; transform: rotate(-5deg); }
+    .eyebrow { margin: 0 0 2px; color: var(--pink-dark); font-weight: 900; font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; }
+    h1, h2, p { margin-top: 0; }
+    h1 { margin-bottom: 0; font-size: clamp(1.35rem, 3vw, 2rem); line-height: 1.05; }
+    .restart { border: 2px solid var(--ink); border-radius: 999px; padding: 10px 16px; background: var(--paper); color: var(--ink); font-weight: 900; cursor: pointer; box-shadow: 3px 3px 0 var(--ink); transition: transform .2s, box-shadow .2s; }
+    .restart:hover { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink); }
+
+    .layout { display: grid; grid-template-columns: minmax(0, 1fr) 310px; gap: 22px; align-items: start; }
+    .layout.hidden, .restart.hidden { display: none; }
+    .menu { position: relative; overflow: hidden; max-width: 860px; margin: 36px auto 0; padding: clamp(28px, 7vw, 68px); text-align: center; }
+    .menu::before, .menu::after { position: absolute; opacity: .8; font-size: 44px; }
+    .menu::before { content: "{ }"; top: 22px; left: 28px; color: var(--purple); font-weight: 900; transform: rotate(-12deg); }
+    .menu::after { content: "</>"; right: 28px; bottom: 22px; color: var(--pink); font-weight: 900; transform: rotate(10deg); }
+    .menu-icon { display: grid; place-items: center; width: 104px; height: 104px; margin: 0 auto 22px; border-radius: 34px; background: #fff0c8; font-size: 62px; transform: rotate(-4deg); }
+    .menu h2 { margin-bottom: 12px; font-size: clamp(2rem, 6vw, 4rem); line-height: .98; }
+    .menu p { max-width: 620px; margin: 0 auto 25px; color: var(--muted); line-height: 1.65; }
+    .code-note { display: inline-block; margin-bottom: 25px; padding: 10px 14px; border-radius: 12px; background: #302b45; color: #ffd166; font: 700 .83rem/1.3 Consolas, monospace; }
+    .start-button { border: 0; border-radius: 999px; padding: 15px 28px; background: var(--pink); color: white; font-weight: 900; cursor: pointer; box-shadow: 5px 5px 0 var(--pink-dark); transition: transform .2s, box-shadow .2s; }
+    .start-button:hover { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--pink-dark); }
+    .menu-features { display: flex; justify-content: center; flex-wrap: wrap; gap: 9px; margin-top: 28px; }
+    .menu-features span { padding: 7px 11px; border-radius: 99px; background: #f8eee5; color: var(--muted); font-size: .78rem; font-weight: 900; }
+    .card { border: 2px solid var(--line); border-radius: 28px; background: rgba(255, 253, 248, .9); box-shadow: var(--shadow); }
+    .game-card { overflow: hidden; }
+    .progress-wrap { padding: 18px 24px 15px; background: #fff2db; border-bottom: 2px dashed var(--line); }
+    .progress-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 10px; color: var(--muted); font-size: .82rem; font-weight: 900; }
+    .timer { display: inline-flex; align-items: center; gap: 5px; padding: 4px 8px; border-radius: 99px; background: #fff; color: var(--pink-dark); }
+    .timer.urgent { color: #b52f2f; background: #ffe2df; animation: pulse .7s infinite alternate; }
+    .progress-bar { height: 12px; overflow: hidden; border-radius: 99px; background: #f5dfbd; }
+    .progress-fill { width: 20%; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--pink), #f49c63); transition: width .5s ease; }
+    .story { padding: clamp(22px, 5vw, 44px); min-height: 400px; transition: opacity .2s, transform .2s; }
+    .story.swap { opacity: 0; transform: translateY(8px); }
+    .stage-icon { display: grid; place-items: center; width: 74px; height: 74px; margin-bottom: 18px; border-radius: 24px; background: #f7eaff; font-size: 42px; transform: rotate(3deg); }
+    .stage-label { margin-bottom: 8px; color: var(--purple); font-size: .78rem; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }
+    .story h2 { max-width: 650px; margin-bottom: 10px; font-size: clamp(1.7rem, 4vw, 2.8rem); line-height: 1.05; }
+    .narrative { max-width: 680px; margin-bottom: 28px; color: var(--muted); font-size: 1.06rem; line-height: 1.6; }
+    .options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .option { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; min-height: 98px; padding: 15px 17px; border: 2px solid var(--line); border-radius: 18px; background: white; color: var(--ink); text-align: left; cursor: pointer; transition: border-color .2s, transform .2s, box-shadow .2s; }
+    .option:hover { border-color: var(--pink); transform: translateY(-3px); box-shadow: 0 8px 15px rgba(239,111,142,.15); }
+    .option strong { font-size: 1rem; }
+    .option span { color: var(--muted); font-size: .86rem; line-height: 1.35; }
+    .option:focus-visible, .restart:focus-visible { outline: 4px solid rgba(139,120,217,.35); outline-offset: 2px; }
+
+    .sidebar { display: grid; gap: 18px; }
+    .status-card, .history-card { padding: 22px; }
+    .card-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+    .card-title h3 { margin: 0; font-size: 1.05rem; }
+    .chef { font-size: 30px; }
+    .metric { margin-bottom: 17px; }
+    .metric:last-child { margin-bottom: 0; }
+    .metric-head { display: flex; justify-content: space-between; margin-bottom: 7px; font-size: .88rem; font-weight: 900; }
+    .metric-head span:last-child { color: var(--muted); }
+    .metric-bar { height: 10px; overflow: hidden; border-radius: 99px; background: #f0e7dd; }
+    .metric-fill { width: 50%; height: 100%; border-radius: inherit; transition: width .45s ease; }
+    [data-metric="flavor"] .metric-fill { background: var(--pink); }
+    [data-metric="texture"] .metric-fill { background: var(--mint); }
+    [data-metric="chaos"] .metric-fill { background: #f3a554; }
+    .hint { margin: 17px 0 0; padding-top: 15px; border-top: 1px dashed var(--line); color: var(--muted); font-size: .78rem; line-height: 1.45; }
+    .error-counter { display: flex; align-items: center; justify-content: space-between; margin: -3px 0 16px; padding: 9px 11px; border-radius: 12px; background: #fff2ef; color: #b4453f; font-size: .82rem; font-weight: 900; }
+    .feedback { position: fixed; z-index: 10; right: 22px; bottom: 22px; width: min(460px, calc(100% - 32px)); padding: 22px 25px; border: 3px solid; border-radius: 24px; color: white; text-align: center; font-size: 1.02rem; box-shadow: 0 22px 48px rgba(61,43,46,.28); opacity: 0; pointer-events: none; transform: translateY(24px) scale(.94); transition: opacity .22s, transform .22s; }
+    .feedback.show { opacity: 1; transform: translateY(0) scale(1); }
+    .feedback.success { background: #278765; border-color: #176548; }
+    .feedback.error { background: #c54c58; border-color: #94323f; }
+    .feedback strong { display: block; margin-bottom: 8px; font-size: clamp(1.6rem, 5vw, 2.45rem); line-height: 1; }
+    .history-list { display: grid; gap: 11px; max-height: 260px; margin: 0; padding: 0; overflow: auto; list-style: none; }
+    .history-list:empty::before { content: "Suas decisões aparecerão aqui."; color: var(--muted); font-size: .86rem; }
+    .history-item { display: grid; grid-template-columns: 28px 1fr; gap: 8px; align-items: start; font-size: .81rem; line-height: 1.35; }
+    .history-num { display: grid; place-items: center; width: 25px; height: 25px; border-radius: 9px; background: #fff0c8; color: #a96d18; font-weight: 900; }
+    .history-item b { display: block; font-size: .82rem; }
+    .history-item small { color: var(--muted); }
+
+    .result { display: none; padding: 42px clamp(22px, 5vw, 56px); text-align: center; }
+    .result.show { display: block; animation: pop .5s ease both; }
+    .result-badge { display: grid; place-items: center; width: 98px; height: 98px; margin: 0 auto 20px; border-radius: 34px; background: #fff0c8; font-size: 58px; transform: rotate(-4deg); }
+    .result h2 { margin-bottom: 12px; font-size: clamp(1.9rem, 5vw, 3.2rem); }
+    .result p { max-width: 600px; margin: 0 auto 24px; color: var(--muted); line-height: 1.6; }
+    .play-again { border: 0; border-radius: 999px; padding: 13px 23px; background: var(--pink); color: white; font-weight: 900; cursor: pointer; box-shadow: 4px 4px 0 var(--pink-dark); }
+    .play-again:hover { filter: brightness(1.05); transform: translateY(-2px); }
+    @keyframes pop { from { opacity: 0; transform: scale(.96); } to { opacity: 1; transform: scale(1); } }
+    @keyframes pulse { to { transform: scale(1.05); } }
+    @media (max-width: 780px) { .layout { grid-template-columns: 1fr; } .sidebar { grid-template-columns: repeat(2, minmax(0, 1fr)); } .status-card, .history-card { padding: 18px; } }
+    @media (max-width: 520px) { .app { width: min(100% - 18px, 1120px); padding-top: 16px; } .topbar { align-items: flex-start; } .brand-mark { width: 43px; height: 43px; border-radius: 14px; font-size: 23px; } .restart { padding: 8px 11px; font-size: .78rem; } .options, .sidebar { grid-template-columns: 1fr; } .story { min-height: auto; padding: 25px 20px 30px; } .progress-wrap { padding-inline: 20px; } }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand"><div class="brand-mark" aria-hidden="true">🍰</div><div><p class="eyebrow">Cozinha Arcade</p><h1>O Desafio do Bolo Perfeito</h1></div></div>
+      <button class="restart" id="restart" type="button">↻ Reiniciar</button>
+    </header>
+
+    <section class="card menu" id="menu">
+      <div class="menu-icon">🧁</div>
+      <p class="eyebrow">Menu Principal · Missão confeiteiro</p>
+      <h2>Compile o bolo perfeito.</h2>
+      <p>Você é o novo programador-chefe da confeitaria. Organize tarefas, tome decisões e descubra como <strong>sequência, condições, loops e debugging</strong> transformam ingredientes em código... quer dizer, em bolo!</p>
+      <div class="code-note">if (bolo.perfeito) { celebrar(); }</div><br />
+      <button class="start-button" id="start-game" type="button">▶ Iniciar Jogo</button>
+      <div class="menu-features"><span>🛒 Mercado</span><span>🧠 Lógica</span><span>🔁 Repetição</span><span>🐛 Debug</span></div>
+    </section>
+
+    <section class="layout hidden" id="game-layout">
+      <article class="card game-card" aria-live="polite">
+        <div class="progress-wrap"><div class="progress-top"><span id="progress-label">Etapa 1 de 5</span><span class="timer" id="timer">⏱ 45s</span><span id="progress-percent">20%</span></div><div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div></div>
+        <div class="story" id="story">
+          <div class="stage-icon" id="stage-icon">🧺</div><div class="stage-label" id="stage-label">Etapa 1 · Massa base</div><h2 id="stage-title"></h2><p class="narrative" id="narrative"></p><div class="options" id="options"></div>
+        </div>
+        <div class="result" id="result"><div class="result-badge" id="result-badge">🏆</div><div class="stage-label">Resultado final</div><h2 id="result-title"></h2><p id="result-text"></p><button class="play-again" id="play-again" type="button">Jogar novamente</button></div>
+      </article>
+
+      <aside class="sidebar">
+        <section class="card status-card"><div class="card-title"><h3>Medidor do bolo</h3><span class="chef">👩‍🍳</span></div>
+          <div class="error-counter"><span>⚠️ Erros permitidos</span><span id="error-value">0 / 3</span></div>
+          <div class="metric" data-metric="flavor"><div class="metric-head"><span>🍓 Sabor</span><span id="flavor-value">50/100</span></div><div class="metric-bar"><div class="metric-fill" id="flavor-fill"></div></div></div>
+          <div class="metric" data-metric="texture"><div class="metric-head"><span>🧽 Consistência</span><span id="texture-value">50/100</span></div><div class="metric-bar"><div class="metric-fill" id="texture-fill"></div></div></div>
+          <div class="metric" data-metric="chaos"><div class="metric-head"><span>🌪️ Caos na cozinha</span><span id="chaos-value">10/100</span></div><div class="metric-bar"><div class="metric-fill" id="chaos-fill"></div></div></div>
+          <p class="hint">Dica: equilíbrio é tudo. Caos alto pode transformar seu bolo em uma aventura!</p>
+        </section>
+        <section class="card history-card"><div class="card-title"><h3>Diário do confeiteiro</h3><span>📖</span></div><ol class="history-list" id="history"></ol></section>
+      </aside>
+    </section>
+  </main>
+  <div class="feedback" id="feedback" role="status" aria-live="assertive"></div>
+
+  <script>
+    // Todo o conteúdo das etapas vive aqui; a interface apenas interpreta estes dados.
+    const gameData = [
+      { icon: '🧺', label: 'Etapa 1 · Massa base', title: 'A aventura começa pelos ingredientes!', narrative: 'A bancada está pronta. Qual massa vai ser a alma do seu bolo?', options: [
+        { name: 'Baunilha clássica', detail: 'Leve, perfumada e confiável.', effects: { flavor: 13, texture: 10, chaos: 0 } },
+        { name: 'Chocolate intenso', detail: 'Cacau em dobro e muita personalidade.', effects: { flavor: 18, texture: 4, chaos: 3 } },
+        { name: 'Limão refrescante', detail: 'Raspinhas cítricas para surpreender.', effects: { flavor: 10, texture: 8, chaos: 2 } },
+        { name: 'Mistério da despensa', detail: 'Um pouco de cada coisa. Vai dar certo...?', effects: { flavor: -4, texture: -8, chaos: 18 } }
+      ] },
+      { icon: '🥣', label: 'Etapa 2 · Técnica', title: 'Misturar é uma arte e também uma ciência!', narrative: 'Os ingredientes se encontraram. Agora escolha como incorporar ar e carinho à massa.', options: [
+        { name: 'Bater até ficar fofo', detail: 'Paciência para uma massa aerada.', effects: { flavor: 5, texture: 16, chaos: 0 } },
+        { name: 'Misturar à mão', detail: 'Delicadeza, ritmo e zero pressa.', effects: { flavor: 8, texture: 11, chaos: 2 } },
+        { name: 'Batedeira no turbo', detail: 'Velocidade máxima, avental preparado.', effects: { flavor: 2, texture: -2, chaos: 12 } },
+        { name: 'Mexer só um pouquinho', detail: 'Atalho para quem está com pressa.', effects: { flavor: -2, texture: -15, chaos: 6 } }
+      ] },
+      { icon: '🧈', label: 'Etapa 3 · Forma e untagem', title: 'A massa precisa de uma casa perfeita.', narrative: 'Escolha a forma e prepare o terreno para o bolo desenformar como um campeão.', options: [
+        { name: 'Forma redonda bem untada', detail: 'Manteiga e farinha em cada cantinho.', effects: { flavor: 3, texture: 10, chaos: 0 } },
+        { name: 'Forma com furo', detail: 'Assa por igual e fica elegante.', effects: { flavor: 5, texture: 14, chaos: 1 } },
+        { name: 'Papel manteiga', detail: 'Prático, limpo e sem drama.', effects: { flavor: 1, texture: 7, chaos: 0 } },
+        { name: 'Forma sem untar', detail: 'Confiança demais pode custar caro.', effects: { flavor: 0, texture: -13, chaos: 15 } }
+      ] },
+      { icon: '🔥', label: 'Etapa 4 · Forno', title: 'O momento decisivo: fogo, tempo e coragem!', narrative: 'O forno está aquecendo. A temperatura certa é o segredo entre um sonho e um carvão.', options: [
+        { name: '180 °C por 35 min', detail: 'O clássico que raramente falha.', effects: { flavor: 8, texture: 15, chaos: 0 } },
+        { name: '170 °C com calma', detail: 'Crescimento lento e centro macio.', effects: { flavor: 10, texture: 12, chaos: 0 } },
+        { name: '220 °C rapidinho', detail: 'Pressa para ver o resultado.', effects: { flavor: -4, texture: -13, chaos: 14 } },
+        { name: 'Esquecer o timer', detail: 'O aroma avisa... quando der.', effects: { flavor: -18, texture: -20, chaos: 24 } }
+      ] },
+      { icon: '🎨', label: 'Etapa 5 · Cobertura', title: 'A grande finalização está nas suas mãos!', narrative: 'O bolo saiu do forno. Dê a ele uma cobertura que conte a história desta jornada.', options: [
+        { name: 'Ganache brilhante', detail: 'Chocolate cremoso e acabamento de estrela.', effects: { flavor: 15, texture: 7, chaos: 1 } },
+        { name: 'Frutas coloridas', detail: 'Frescor, cor e um toque artesanal.', effects: { flavor: 13, texture: 6, chaos: 2 } },
+        { name: 'Chantilly delicado', detail: 'Nuvens doces para um final leve.', effects: { flavor: 10, texture: 9, chaos: 1 } },
+        { name: 'Tudo que encontrei', detail: 'Granulado, balas e muita ousadia.', effects: { flavor: 3, texture: -3, chaos: 20 } }
+      ] }
+    ];
+
+    // Versao pedagogica: cada etapa representa um conceito de logica de programacao.
+    gameData.splice(0, gameData.length,
+      { icon: '🛒', label: 'Fase 1 · Mercado', title: 'Antes do bolo, organize o algoritmo!', narrative: 'Sua primeira tarefa e ir ao mercado. Qual sequencia de compras evita erros e garante que todos os ingredientes cheguem?', options: [
+        { name: 'Ler a receita e criar uma lista', detail: 'Sequencia: planejar antes de executar.', effects: { flavor: 14, texture: 10, chaos: -5 } },
+        { name: 'Comprar por impulso', detail: 'Sem variavel de controle: itens aleatorios.', effects: { flavor: 3, texture: -3, chaos: 18 } },
+        { name: 'Ir direto ao caixa', detail: 'Pular etapas costuma gerar ingrediente faltando.', effects: { flavor: -8, texture: -10, chaos: 20 } },
+        { name: 'Fazer uma lista com repeticoes', detail: 'O mesmo item aparece 5 vezes.', effects: { flavor: 7, texture: 2, chaos: 12 } }
+      ] },
+      { icon: '🥣', label: 'Fase 2 · Variaveis', title: 'Declare as variaveis da massa!', narrative: 'Agora associe cada ingrediente ao seu papel. Uma boa estrutura deixa o programa (e o bolo) consistente.', options: [
+        { name: 'Separar secos e liquidos', detail: 'Organizacao de dados antes da mistura.', effects: { flavor: 9, texture: 15, chaos: -3 } },
+        { name: 'Misturar tudo de uma vez', detail: 'Funciona as vezes, mas dificulta encontrar erros.', effects: { flavor: 5, texture: 2, chaos: 10 } },
+        { name: 'Esquecer o fermento', detail: 'Uma variavel essencial ficou fora do escopo.', effects: { flavor: 0, texture: -18, chaos: 9 } },
+        { name: 'Trocar todos os ingredientes', detail: 'Alterar requisitos sem testar o resultado.', effects: { flavor: -8, texture: -10, chaos: 24 } }
+      ] },
+      { icon: '🔁', label: 'Fase 3 · Loop de mistura', title: 'Repita ate a massa ficar homogenea!', narrative: 'Use um loop com criterio de parada. Continue misturando enquanto ainda houver pelotas, mas sem entrar em loop infinito.', options: [
+        { name: 'Enquanto houver pelotas, misturar', detail: 'while (pelotas > 0): misturar()', effects: { flavor: 7, texture: 17, chaos: -2 } },
+        { name: 'Repetir exatamente 10 vezes', detail: 'Um for previsivel e seguro.', effects: { flavor: 8, texture: 12, chaos: 0 } },
+        { name: 'Misturar para sempre', detail: 'Loop infinito: a cozinha entra em panico.', effects: { flavor: -3, texture: -8, chaos: 27 } },
+        { name: 'Nao misturar', detail: 'Executar o programa sem processar os dados.', effects: { flavor: -5, texture: -20, chaos: 12 } }
+      ] },
+      { icon: '⚡', label: 'Fase 4 · Imprevisto', title: 'A batedeira quebrou!', narrative: 'Uma excecao aconteceu no meio da receita. Escolha um plano B sem deixar o caos tomar conta.', options: [
+        { name: 'Usar fouet e reduzir o ritmo', detail: 'Fallback manual, com paciencia.', effects: { flavor: 5, texture: 10, chaos: 2 } },
+        { name: 'Pedir uma batedeira emprestada', detail: 'Resolver a dependencia antes de seguir.', effects: { flavor: 4, texture: 9, chaos: 5 } },
+        { name: 'Bater com garfo e pressa', detail: 'Uma solucao improvisada demais.', effects: { flavor: -2, texture: -9, chaos: 16 } },
+        { name: 'Desistir da massa', detail: 'Interromper o processo gera desperdicio.', effects: { flavor: -12, texture: -15, chaos: 12 } }
+      ] },
+      { icon: '🍬', label: 'Fase 5 · Acucar', title: 'Ops! A quantidade de acucar esta errada.', narrative: 'Voce percebeu o erro antes de assar. Como corrige esse dado de entrada?', options: [
+        { name: 'Conferir a receita e ajustar', detail: 'Validacao antes de continuar.', effects: { flavor: 12, texture: 4, chaos: -4 } },
+        { name: 'Equilibrar com cacau e pitada de sal', detail: 'Correcao criativa e controlada.', effects: { flavor: 8, texture: 3, chaos: 4 } },
+        { name: 'Ignorar o erro', detail: 'Sem debug, o resultado fica imprevisivel.', effects: { flavor: -15, texture: -3, chaos: 14 } },
+        { name: 'Dobrar todos os ingredientes', detail: 'Uma correcao desproporcional.', effects: { flavor: -8, texture: -7, chaos: 22 } }
+      ] },
+      { icon: '⏳', label: 'Fase 6 · Descanso', title: 'A massa precisa descansar?', narrative: 'Decida quando executar a proxima etapa. Um pequeno intervalo pode melhorar a estrutura do bolo.', options: [
+        { name: 'Descansar pelo tempo indicado', detail: 'Respeitar o tempo do processo.', effects: { flavor: 6, texture: 14, chaos: -3 } },
+        { name: 'Preparar a forma enquanto espera', detail: 'Paralelizar tarefas sem pular etapas.', effects: { flavor: 5, texture: 12, chaos: -5 } },
+        { name: 'Assar imediatamente', detail: 'A pressa reduz a estabilidade da massa.', effects: { flavor: -2, texture: -10, chaos: 7 } },
+        { name: 'Esquecer a massa por horas', detail: 'Tempo demais tambem e um bug.', effects: { flavor: -8, texture: -13, chaos: 17 } }
+      ] },
+      { icon: '🔥', label: 'Fase 7 · Forno', title: 'O gas acabou no meio da assagem!', narrative: 'O forno desligou antes do fim. Avalie a situacao e escolha a condicao mais segura para salvar o bolo.', options: [
+        { name: 'Transferir para outro forno', detail: 'Retomar com a mesma temperatura.', effects: { flavor: 8, texture: 12, chaos: 6 } },
+        { name: 'Esperar o gas voltar, com cuidado', detail: 'Pausa controlada e acompanhamento.', effects: { flavor: 3, texture: 5, chaos: 9 } },
+        { name: 'Aumentar o fogo no retorno', detail: 'Compensar tempo com calor cria risco.', effects: { flavor: -6, texture: -13, chaos: 18 } },
+        { name: 'Abrir o forno varias vezes', detail: 'Instabilidade faz o bolo murchar.', effects: { flavor: -4, texture: -15, chaos: 15 } }
+      ] },
+      { icon: '❄️', label: 'Fase 8 · Resfriamento', title: 'Deixe o bolo esfriar antes de montar.', narrative: 'O bolo esta pronto, mas ainda quente. A proxima decisao determina se a estrutura vai se manter firme.', options: [
+        { name: 'Esfriar em grade por completo', detail: 'Base estavel para o recheio.', effects: { flavor: 6, texture: 15, chaos: -4 } },
+        { name: 'Aguardar 20 minutos e testar', detail: 'Checagem gradual antes da proxima etapa.', effects: { flavor: 4, texture: 9, chaos: 1 } },
+        { name: 'Rechear quente', detail: 'O calor derrete tudo e gera bagunca.', effects: { flavor: 2, texture: -14, chaos: 21 } },
+        { name: 'Colocar no congelador de qualquer jeito', detail: 'Mudanca brusca sem controle.', effects: { flavor: -3, texture: -8, chaos: 12 } }
+      ] },
+      { icon: '🍓', label: 'Fase 9 · Recheio', title: 'Escolha a funcao de recheio!', narrative: 'Com a massa estavel, defina o sabor que vai ligar as camadas do seu projeto.', options: [
+        { name: 'Ganache de chocolate', detail: 'Intenso, classico e equilibrado.', effects: { flavor: 15, texture: 5, chaos: 1 } },
+        { name: 'Creme de morango', detail: 'Leve e colorido para o usuario final.', effects: { flavor: 13, texture: 6, chaos: 2 } },
+        { name: 'Doce de leite em excesso', detail: 'Carga demais entre as camadas.', effects: { flavor: 6, texture: -8, chaos: 11 } },
+        { name: 'Recheio sem provar', detail: 'Deploy sem teste de sabor.', effects: { flavor: -5, texture: 0, chaos: 13 } }
+      ] },
+      { icon: '🎂', label: 'Fase 10 · Montagem e deploy', title: 'Monte as camadas e entregue o bolo!', narrative: 'A etapa final combina criatividade e revisao. Escolha como apresentar seu bolo para quem vai provar.', options: [
+        { name: 'Alinhar camadas e finalizar com ganache', detail: 'Interface bonita e estrutura confiavel.', effects: { flavor: 14, texture: 12, chaos: -4 } },
+        { name: 'Decorar com frutas e testar estabilidade', detail: 'Criatividade com controle de qualidade.', effects: { flavor: 12, texture: 10, chaos: -2 } },
+        { name: 'Empilhar tudo rapidamente', detail: 'Sem alinhamento, a estrutura desaba.', effects: { flavor: 2, texture: -13, chaos: 20 } },
+        { name: 'Adicionar enfeites sem limite', detail: 'Muitas features deixam a entrega confusa.', effects: { flavor: 4, texture: -5, chaos: 24 } }
+      ] }
+    );
+
+    // Opcoes revisadas com pegadinhas: pequenas falhas de ordem, validacao ou medida mudam o resultado.
+    const advancedOptions = {
+      0: [
+        { name: 'Conferir a despensa, listar faltas e depois comprar', detail: 'A sequência evita duplicatas e faltas.', effects: { flavor: 15, texture: 10, chaos: -5 } },
+        { name: 'Comprar a lista inteira sem olhar validade', detail: 'Parece organizado, mas um ingrediente vencido estraga a base.', effects: { flavor: -5, texture: 2, chaos: 8 } },
+        { name: 'Escolher apenas as marcas mais caras', detail: 'Preço não substitui quantidade e proporção corretas.', effects: { flavor: 3, texture: -2, chaos: 7 } },
+        { name: 'Comprar tudo “aproximadamente” pela embalagem', detail: 'Medidas imprecisas viram bugs na receita.', effects: { flavor: -7, texture: -8, chaos: 15 } }
+      ],
+      1: [
+        { name: 'Pesar ingredientes e separar secos dos líquidos', detail: 'Variáveis bem definidas antes de executar.', effects: { flavor: 10, texture: 15, chaos: -4 } },
+        { name: 'Medir farinha compactando o copo', detail: 'A medida parece cheia, mas fica maior que a receita pede.', effects: { flavor: 1, texture: -10, chaos: 5 } },
+        { name: 'Trocar manteiga por óleo na mesma quantidade', detail: 'Substituição sem conversão muda a estrutura.', effects: { flavor: 2, texture: -8, chaos: 7 } },
+        { name: 'Separar tudo, mas esquecer de conferir o fermento', detail: 'Organização não salva uma variável ausente.', effects: { flavor: 0, texture: -16, chaos: 9 } }
+      ],
+      2: [
+        { name: 'Misturar secos e incorporar líquidos aos poucos', detail: 'Controle de textura sem desenvolver glúten demais.', effects: { flavor: 8, texture: 16, chaos: -3 } },
+        { name: 'Bater até sumir toda bolha de ar', detail: 'Parece capricho, mas deixa a massa pesada.', effects: { flavor: 2, texture: -11, chaos: 5 } },
+        { name: 'Parar assim que a farinha desaparecer', detail: 'Pode haver bolsões secos escondidos.', effects: { flavor: 3, texture: -5, chaos: 4 } },
+        { name: 'Usar velocidade máxima para ganhar tempo', detail: 'Rapidez cria respingos e altera a estrutura.', effects: { flavor: -2, texture: -9, chaos: 18 } }
+      ],
+      3: [
+        { name: 'Trocar pelo fouet e dividir a massa em porções', detail: 'Plano B estável, mesmo mais lento.', effects: { flavor: 6, texture: 11, chaos: 1 } },
+        { name: 'Usar liquidificador em pulsos curtos', detail: 'Parece prático, mas pode bater demais a farinha.', effects: { flavor: 2, texture: -6, chaos: 8 } },
+        { name: 'Esperar consertar mantendo a massa parada', detail: 'A massa perde ar enquanto a reação continua.', effects: { flavor: -1, texture: -8, chaos: 10 } },
+        { name: 'Adicionar mais leite para facilitar o fouet', detail: 'Resolver a ferramenta alterando a receita é uma armadilha.', effects: { flavor: -5, texture: -12, chaos: 13 } }
+      ],
+      4: [
+        { name: 'Recalcular a receita e remover o excesso antes de assar', detail: 'Corrigir a entrada mantém as proporções.', effects: { flavor: 13, texture: 5, chaos: -4 } },
+        { name: 'Adicionar sal “até equilibrar” sem medir', detail: 'A ideia parece boa, mas uma correção sem escala gera outro erro.', effects: { flavor: -7, texture: 0, chaos: 10 } },
+        { name: 'Dobrar farinha e ovos para acompanhar o açúcar', detail: 'Pode funcionar, mas muda quantidade, tempo e forma.', effects: { flavor: 2, texture: -7, chaos: 13 } },
+        { name: 'Assar e compensar com cobertura menos doce', detail: 'A cobertura não corrige o centro do bolo.', effects: { flavor: -12, texture: -2, chaos: 9 } }
+      ],
+      5: [
+        { name: 'Descansar apenas o tempo indicado e cobrir a tigela', detail: 'Tempo e proteção corretos preservam a massa.', effects: { flavor: 6, texture: 14, chaos: -4 } },
+        { name: 'Deixar descansar até dobrar de volume', detail: 'Essa regra parece certa, mas não vale para toda massa de bolo.', effects: { flavor: 1, texture: -7, chaos: 5 } },
+        { name: 'Mexer de novo depois do descanso para garantir', detail: 'Você perde o ar incorporado que acabou de preservar.', effects: { flavor: 2, texture: -9, chaos: 5 } },
+        { name: 'Descansar sem cobrir perto do forno quente', detail: 'Calor e ressecamento mudam a textura.', effects: { flavor: -3, texture: -12, chaos: 11 } }
+      ],
+      6: [
+        { name: 'Mover para outro forno já aquecido na mesma temperatura', detail: 'Mantém a condição de assagem o mais constante possível.', effects: { flavor: 9, texture: 12, chaos: 5 } },
+        { name: 'Esperar o gás voltar com o bolo dentro do forno fechado', detail: 'Parece seguro, mas a queda de temperatura afeta o crescimento.', effects: { flavor: 0, texture: -9, chaos: 10 } },
+        { name: 'Recomeçar o timer inteiro quando o gás voltar', detail: 'Ignora o tempo que o bolo já assou e pode queimar.', effects: { flavor: -6, texture: -12, chaos: 11 } },
+        { name: 'Aumentar para 250 °C para recuperar o atraso', detail: 'Compensação agressiva que queima a borda.', effects: { flavor: -15, texture: -17, chaos: 22 } }
+      ],
+      7: [
+        { name: 'Esperar esfriar na grade antes de desenformar', detail: 'A estrutura termina de firmar com circulação de ar.', effects: { flavor: 6, texture: 15, chaos: -4 } },
+        { name: 'Colocar na geladeira ainda fumegando', detail: 'O frio parece acelerar, mas gera condensação.', effects: { flavor: 1, texture: -7, chaos: 6 } },
+        { name: 'Desenformar quente para não grudar', detail: 'A intenção é boa, mas a massa ainda está frágil.', effects: { flavor: 1, texture: -12, chaos: 12 } },
+        { name: 'Cobrir com plástico antes de esfriar', detail: 'O vapor fica preso e deixa a superfície úmida.', effects: { flavor: -2, texture: -9, chaos: 8 } }
+      ],
+      8: [
+        { name: 'Usar ganache já em ponto de espalhar', detail: 'Recheio com temperatura e textura controladas.', effects: { flavor: 15, texture: 7, chaos: -2 } },
+        { name: 'Colocar geleia direto do pote, bem líquida', detail: 'Sabor bom, mas excesso de umidade faz as camadas escorregarem.', effects: { flavor: 8, texture: -7, chaos: 9 } },
+        { name: 'Usar muito recheio para deixar mais gostoso', detail: 'Mais recheio pode comprometer a estabilidade.', effects: { flavor: 7, texture: -9, chaos: 10 } },
+        { name: 'Rechear sem provar porque a marca é confiável', detail: 'Confiar no rótulo não substitui o teste final.', effects: { flavor: -4, texture: 0, chaos: 8 } }
+      ],
+      9: [
+        { name: 'Nivelar as camadas e refrigerar entre cada montagem', detail: 'Entrega bonita e estruturalmente segura.', effects: { flavor: 14, texture: 14, chaos: -5 } },
+        { name: 'Usar palitos escondidos para segurar camadas tortas', detail: 'Parece solução, mas o problema de alinhamento continua.', effects: { flavor: 3, texture: -6, chaos: 8 } },
+        { name: 'Cobrir imperfeições com muitos confeitos', detail: 'Decoração não corrige uma base instável.', effects: { flavor: 4, texture: -7, chaos: 11 } },
+        { name: 'Montar e transportar imediatamente', detail: 'Pular o tempo de firmar aumenta o risco de desabar.', effects: { flavor: -3, texture: -13, chaos: 18 } }
+      ]
+    };
+    gameData.push(
+      { icon: '🧈', label: 'Fase 11 · Forma', title: 'A forma está preparada mesmo?', narrative: 'Antes de despejar a massa, avalie se a forma foi configurada para desenformar sem surpresas.', options: [] },
+      { icon: '🧪', label: 'Fase 12 · Teste do palito', title: 'O palito saiu com algumas migalhas.', narrative: 'Interprete o teste com cuidado: nem todo sinal significa que o bolo está cru.', options: [] },
+      { icon: '📐', label: 'Fase 13 · Corte das camadas', title: 'Hora de dividir o bolo em camadas.', narrative: 'Precisão agora evita um bolo inclinado no final da montagem.', options: [] },
+      { icon: '🥛', label: 'Fase 14 · Calda', title: 'Você vai umedecer as camadas?', narrative: 'A calda ajuda no sabor, mas uma dose errada altera a estrutura.', options: [] },
+      { icon: '🌡️', label: 'Fase 15 · Temperatura', title: 'O recheio e o bolo estão em temperaturas diferentes.', narrative: 'Escolha como sincronizar os componentes antes da montagem.', options: [] },
+      { icon: '🧁', label: 'Fase 16 · Cobertura', title: 'A cobertura começou a ficar mole.', narrative: 'É um problema de ponto ou de temperatura? Decida antes de aplicar.', options: [] },
+      { icon: '🎨', label: 'Fase 17 · Decoração', title: 'A decoração precisa ter função e estilo.', narrative: 'Equilibre criatividade, peso e estabilidade para terminar bem.', options: [] },
+      { icon: '📦', label: 'Fase 18 · Transporte', title: 'O bolo precisa atravessar a cidade.', narrative: 'A entrega é parte da experiência: proteja seu projeto até o destino.', options: [] },
+      { icon: '🔎', label: 'Fase 19 · Revisão final', title: 'Faça uma última revisão de qualidade.', narrative: 'Antes de servir, encontre o detalhe que pode comprometer toda a experiência.', options: [] },
+      { icon: '🏁', label: 'Fase 20 · Grande entrega', title: 'A mesa está pronta para a apresentação.', narrative: 'Escolha como concluir a missão e apresentar seu bolo ao público.', options: [] }
+    );
+
+    Object.assign(advancedOptions, {
+      10: [
+        { name: 'Untar, enfarinhar e retirar o excesso', detail: 'Proteção uniforme sem criar uma crosta grossa.', effects: { flavor: 4, texture: 12, chaos: -3 } },
+        { name: 'Untar só o fundo para economizar manteiga', detail: 'Parece eficiente, mas as laterais podem prender.', effects: { flavor: 1, texture: -9, chaos: 8 } },
+        { name: 'Usar manteiga gelada em pedaços', detail: 'A forma parece untada, mas a cobertura fica irregular.', effects: { flavor: 0, texture: -6, chaos: 6 } },
+        { name: 'Forrar com papel sem ajustar as bordas', detail: 'Dobras escondidas deformam o bolo.', effects: { flavor: -1, texture: -8, chaos: 9 } }
+      ],
+      11: [
+        { name: 'Assar mais alguns minutos e testar de novo', detail: 'Migalhas úmidas não são massa líquida; confirme antes de agir.', effects: { flavor: 5, texture: 9, chaos: -2 } },
+        { name: 'Retirar imediatamente porque o palito não está molhado', detail: 'Uma leitura apressada pode deixar o centro cru.', effects: { flavor: 0, texture: -11, chaos: 8 } },
+        { name: 'Deixar até o palito sair completamente seco', detail: 'Parece seguro, mas pode ressecar o bolo.', effects: { flavor: -4, texture: -9, chaos: 5 } },
+        { name: 'Abrir o forno a cada dois minutos', detail: 'Checagem excessiva derruba a temperatura.', effects: { flavor: -2, texture: -10, chaos: 11 } }
+      ],
+      12: [
+        { name: 'Marcar a altura e usar faca serrilhada devagar', detail: 'Referências visuais mantêm as camadas niveladas.', effects: { flavor: 3, texture: 13, chaos: -4 } },
+        { name: 'Cortar pelo meio olhando de cima', detail: 'Parece simples, mas a perspectiva engana.', effects: { flavor: 1, texture: -8, chaos: 8 } },
+        { name: 'Usar uma faca lisa com pressão forte', detail: 'A força comprime e esfarela a massa.', effects: { flavor: -2, texture: -10, chaos: 9 } },
+        { name: 'Fazer três cortes para ter mais recheio', detail: 'Mais camadas sem altura suficiente deixam tudo frágil.', effects: { flavor: 4, texture: -12, chaos: 12 } }
+      ],
+      13: [
+        { name: 'Aplicar uma camada fina de calda fria', detail: 'Umedece sem saturar a estrutura.', effects: { flavor: 11, texture: 7, chaos: -2 } },
+        { name: 'Molhar até a calda aparecer na base', detail: 'Mais umidade parece melhor, mas a massa perde firmeza.', effects: { flavor: 5, texture: -12, chaos: 10 } },
+        { name: 'Usar calda quente para absorver mais rápido', detail: 'O choque de temperatura pode dissolver o recheio.', effects: { flavor: 2, texture: -8, chaos: 9 } },
+        { name: 'Pular a calda porque o recheio resolve tudo', detail: 'Nem todo recheio compensa uma massa seca.', effects: { flavor: -3, texture: -5, chaos: 3 } }
+      ],
+      14: [
+        { name: 'Esperar os dois componentes chegarem ao ponto ideal', detail: 'Temperaturas compatíveis evitam derretimento e quebra.', effects: { flavor: 5, texture: 12, chaos: -4 } },
+        { name: 'Usar recheio gelado no bolo ainda morno', detail: 'Parece prático, mas causa condensação e instabilidade.', effects: { flavor: 2, texture: -8, chaos: 7 } },
+        { name: 'Aquecer o recheio até ficar fluido demais', detail: 'Espalha fácil, mas escorre entre as camadas.', effects: { flavor: 3, texture: -11, chaos: 11 } },
+        { name: 'Montar sem verificar a temperatura', detail: 'Ignorar a condição transforma detalhes em erros grandes.', effects: { flavor: -3, texture: -9, chaos: 10 } }
+      ],
+      15: [
+        { name: 'Resfriar a cobertura em intervalos e mexer', detail: 'Ajuste gradual conserva um ponto cremoso.', effects: { flavor: 7, texture: 12, chaos: -3 } },
+        { name: 'Adicionar muito açúcar de uma vez', detail: 'Engrossa rápido, mas pode ficar granulada e doce demais.', effects: { flavor: -5, texture: -7, chaos: 7 } },
+        { name: 'Aplicar líquida e esperar firmar no bolo', detail: 'A cobertura escorre antes de estabilizar.', effects: { flavor: 2, texture: -9, chaos: 12 } },
+        { name: 'Bater na velocidade máxima por vários minutos', detail: 'Excesso de ar pode talhar a mistura.', effects: { flavor: -3, texture: -10, chaos: 12 } }
+      ],
+      16: [
+        { name: 'Escolher poucos elementos leves e com contraste', detail: 'Design funcional: bonito sem sobrecarregar.', effects: { flavor: 7, texture: 7, chaos: -3 } },
+        { name: 'Centralizar toda a decoração em um único lado', detail: 'O visual chama atenção, mas o peso pode inclinar o bolo.', effects: { flavor: 3, texture: -7, chaos: 8 } },
+        { name: 'Usar frutas lavadas ainda molhadas', detail: 'Brilham no começo, porém liberam água na cobertura.', effects: { flavor: 4, texture: -6, chaos: 6 } },
+        { name: 'Cobrir tudo com enfeites pesados', detail: 'Mais detalhes não significam mais estabilidade.', effects: { flavor: 1, texture: -10, chaos: 13 } }
+      ],
+      17: [
+        { name: 'Usar caixa firme, base antiderrapante e refrigeração', detail: 'Proteção adequada do preparo à entrega.', effects: { flavor: 4, texture: 12, chaos: -5 } },
+        { name: 'Colocar na caixa bonita, mas grande demais', detail: 'A apresentação parece ótima, mas o bolo desliza nas curvas.', effects: { flavor: 1, texture: -9, chaos: 10 } },
+        { name: 'Transportar no banco do carro sem apoio', detail: 'O trajeto vira uma sequência de impactos.', effects: { flavor: -3, texture: -14, chaos: 18 } },
+        { name: 'Refrigerar até congelar para garantir firmeza', detail: 'Firmeza excessiva prejudica textura e condensação na chegada.', effects: { flavor: -5, texture: -7, chaos: 6 } }
+      ],
+      18: [
+        { name: 'Checar nivelamento, ponto da cobertura e limpeza da base', detail: 'Uma revisão curta resolve defeitos visíveis.', effects: { flavor: 6, texture: 9, chaos: -4 } },
+        { name: 'Corrigir apenas o que a foto mostra', detail: 'A câmera não revela estabilidade ou textura.', effects: { flavor: 1, texture: -4, chaos: 5 } },
+        { name: 'Adicionar cobertura onde há falhas sem raspar antes', detail: 'O remendo cria espessura irregular.', effects: { flavor: 2, texture: -5, chaos: 6 } },
+        { name: 'Não mexer em nada para não arriscar', detail: 'Evitar ação também pode deixar um erro conhecido.', effects: { flavor: -2, texture: -3, chaos: 4 } }
+      ],
+      19: [
+        { name: 'Servir após explicar sabores e cortar com faca quente', detail: 'Boa apresentação e fatias limpas no momento final.', effects: { flavor: 12, texture: 9, chaos: -4 } },
+        { name: 'Cortar a primeira fatia com faca fria e serrilhada', detail: 'Parece comum, mas pode puxar toda a cobertura.', effects: { flavor: 2, texture: -6, chaos: 7 } },
+        { name: 'Esperar os convidados se servirem sozinhos', detail: 'Autonomia é boa, mas a montagem pode perder o controle.', effects: { flavor: 1, texture: -4, chaos: 8 } },
+        { name: 'Acender muitas velas perto da cobertura', detail: 'O efeito é bonito, mas o calor compromete o acabamento.', effects: { flavor: -2, texture: -7, chaos: 10 } }
+      ]
+    });
+    gameData.forEach((stage, index) => { stage.options = advancedOptions[index]; });
+
+    Object.assign(gameData[0], { narrative: 'Sua primeira tarefa é ir ao mercado. Qual sequência de compras evita erros e garante que todos os ingredientes cheguem?' });
+    Object.assign(gameData[1], { label: 'Fase 2 · Variáveis', title: 'Declare as variáveis da massa!', narrative: 'Agora associe cada ingrediente ao seu papel. Uma boa estrutura deixa o programa e o bolo consistentes.' });
+    Object.assign(gameData[2], { title: 'Repita até a massa ficar homogênea!', narrative: 'Use um loop com critério de parada. Continue misturando enquanto ainda houver pelotas, mas sem entrar em loop infinito.' });
+    Object.assign(gameData[3], { narrative: 'Uma exceção aconteceu no meio da receita. Escolha um plano B sem deixar o caos tomar conta.' });
+    Object.assign(gameData[4], { label: 'Fase 5 · Açúcar', title: 'Ops! A quantidade de açúcar está errada.', narrative: 'Você percebeu o erro antes de assar. Como corrige esse dado de entrada?' });
+    Object.assign(gameData[5], { narrative: 'Decida quando executar a próxima etapa. Um pequeno intervalo pode melhorar a estrutura do bolo.' });
+    Object.assign(gameData[6], { title: 'O gás acabou no meio da assagem!', narrative: 'O forno desligou antes do fim. Avalie a situação e escolha a condição mais segura para salvar o bolo.' });
+    Object.assign(gameData[7], { narrative: 'O bolo está pronto, mas ainda quente. A próxima decisão determina se a estrutura vai se manter firme.' });
+    Object.assign(gameData[8], { title: 'Escolha a função de recheio!', narrative: 'Com a massa estável, defina o sabor que vai ligar as camadas do seu projeto.' });
+    gameData.forEach((stage) => stage.options.forEach((option, index) => { option.correct = index === 0; }));
+
+    const maxErrors = 3;
+    const initialState = () => ({ step: 0, metrics: { flavor: 50, texture: 50, chaos: 10 }, choices: [], errors: 0, presentedOptions: [] });
+    let state = initialState();
+    let timerId = null;
+    let feedbackId = null;
+    const secondsPerStage = 45;
+    const $ = (id) => document.getElementById(id);
+    const clamp = (value) => Math.max(0, Math.min(100, value));
+    const shuffle = (items) => [...items].sort(() => Math.random() - .5);
+
+    function stopTimer() { if (timerId) clearInterval(timerId); timerId = null; }
+    function startTimer() {
+      stopTimer();
+      let remaining = secondsPerStage;
+      const timer = $('timer');
+      const update = () => { timer.textContent = `⏱ ${remaining}s`; timer.classList.toggle('urgent', remaining <= 5); };
+      update();
+      timerId = setInterval(() => {
+        remaining -= 1; update();
+        if (remaining <= 0) { stopTimer(); choose(Math.floor(Math.random() * state.presentedOptions.length), true); }
+      }, 1000);
+    }
+
+    function renderMetrics() {
+      const labels = { flavor: 'flavor', texture: 'texture', chaos: 'chaos' };
+      Object.keys(labels).forEach((metric) => { $(metric + '-value').textContent = state.metrics[metric] + '/100'; $(metric + '-fill').style.width = state.metrics[metric] + '%'; });
+      $('error-value').textContent = `${state.errors} / ${maxErrors}`;
+    }
+    function showFeedback(correct, option) {
+      const feedback = $('feedback');
+      clearTimeout(feedbackId);
+      feedback.className = `feedback ${correct ? 'success' : 'error'} show`;
+      feedback.innerHTML = correct
+        ? `<strong>✓ Acertou!</strong>${option.name} foi uma decisão segura.`
+        : `<strong>✕ Errou!</strong>${option.name} tem uma pegadinha. Erros: ${state.errors}/${maxErrors}.`;
+      feedbackId = setTimeout(() => feedback.classList.remove('show'), 2600);
+    }
+    function renderHistory() {
+      $('history').innerHTML = state.choices.map((choice, i) => `<li class="history-item"><span class="history-num">${i + 1}</span><div><b>${choice.stage}</b><small>${choice.name}</small></div></li>`).join('');
+    }
+    function renderStage(animate = false) {
+      const stage = gameData[state.step];
+      const story = $('story');
+      const paint = () => {
+        $('stage-icon').textContent = stage.icon; $('stage-label').textContent = stage.label; $('stage-title').textContent = stage.title; $('narrative').textContent = stage.narrative;
+        state.presentedOptions = shuffle(stage.options);
+        $('options').innerHTML = state.presentedOptions.map((option, index) => `<button class="option" type="button" data-option="${index}"><strong>${option.name}</strong><span>${option.detail}</span></button>`).join('');
+        $('progress-label').textContent = `Etapa ${state.step + 1} de ${gameData.length}`; $('progress-percent').textContent = `${Math.round(((state.step + 1) / gameData.length) * 100)}%`; $('progress-fill').style.width = `${((state.step + 1) / gameData.length) * 100}%`;
+        $('result').classList.remove('show'); $('story').style.display = 'block';
+        if (!$('game-layout').classList.contains('hidden')) startTimer();
+      };
+      if (animate) { story.classList.add('swap'); setTimeout(() => { paint(); story.classList.remove('swap'); }, 180); } else paint();
+    }
+    function choose(index, timedOut = false) {
+      stopTimer();
+      const stage = gameData[state.step]; const option = state.presentedOptions[index];
+      Object.entries(option.effects).forEach(([metric, amount]) => { state.metrics[metric] = clamp(state.metrics[metric] + amount); });
+      const isCorrect = option.correct && !timedOut;
+      if (!isCorrect) state.errors += 1;
+      showFeedback(isCorrect, option);
+      const choiceName = `${isCorrect ? '✓' : '✕'} ${timedOut ? 'Tempo esgotado: ' : ''}${option.name}`;
+      state.choices.push({ stage: stage.label.split(' · ')[1], name: choiceName }); state.step += 1; renderMetrics(); renderHistory();
+      if (state.errors >= maxErrors) showResult();
+      else if (state.step < gameData.length) renderStage(true); else showResult();
+    }
+    function showResult() {
+      stopTimer();
+      let result;
+      const { flavor, texture, chaos } = state.metrics;
+      if (state.errors >= maxErrors) result = { icon: '🚫', title: 'Missão encerrada: 3 erros', text: 'Você atingiu o limite de erros. Revise as pegadinhas e tente novamente: detalhes de ordem, medida e temperatura fazem toda a diferença.' };
+      else if (chaos >= 70) result = { icon: '💥', title: 'Desastre Culinário Explosivo', text: 'A cozinha virou uma zona de guerra açucarada! Pelo menos ninguém vai esquecer este bolo tão cedo.' };
+      else if (flavor <= 35 || texture <= 30) result = { icon: '🧱', title: 'Bolo de Aniversário Solado', text: 'Ele chegou à mesa, mas ficou mais parecido com um peso de papel. Na próxima, dê mais atenção à massa e ao forno.' };
+      else if (texture <= 45 && flavor < 65) result = { icon: '🔥', title: 'Torta de Carvão', text: 'O forno falou mais alto e transformou sua criação em uma lembrança crocante. Menos temperatura, mais timer!' };
+      else if (flavor >= 82 && texture >= 82 && chaos <= 28) result = { icon: '🏆', title: 'Bolo Mestre Cuca 5 Estrelas', text: 'Perfeito! Sabor equilibrado, textura fofinha e uma cozinha sob controle. Você dominou o desafio!' };
+      else result = { icon: '🍰', title: 'Bolo Caseiro de Respeito', text: 'Uma delícia feita com personalidade. Nem tudo saiu como planejado, mas cada fatia conta uma boa história.' };
+      $('story').style.display = 'none'; $('result-badge').textContent = result.icon; $('result-title').textContent = result.title; $('result-text').textContent = result.text; $('result').classList.add('show'); $('progress-label').textContent = 'Desafio concluído'; $('timer').textContent = '✓ Fim'; $('timer').classList.remove('urgent'); $('progress-percent').textContent = '100%'; $('progress-fill').style.width = '100%';
+    }
+    function startGame() {
+      $('menu').style.display = 'none';
+      $('game-layout').classList.remove('hidden');
+      $('restart').classList.remove('hidden');
+      reset();
+    }
+    function returnToMenu() {
+      stopTimer();
+      clearTimeout(feedbackId); $('feedback').className = 'feedback';
+      state = initialState();
+      $('game-layout').classList.add('hidden');
+      $('restart').classList.add('hidden');
+      renderMetrics();
+      renderHistory();
+      renderStage();
+      $('menu').style.display = 'block';
+    }
+    function reset() { stopTimer(); clearTimeout(feedbackId); $('feedback').className = 'feedback'; state = initialState(); renderMetrics(); renderHistory(); renderStage(); }
+    $('options').addEventListener('click', (event) => { const button = event.target.closest('[data-option]'); if (button) choose(Number(button.dataset.option)); });
+    $('start-game').addEventListener('click', startGame);
+    $('restart').addEventListener('click', returnToMenu); $('play-again').addEventListener('click', reset); $('restart').textContent = '← Voltar ao Menu'; $('restart').classList.add('hidden'); renderMetrics(); renderStage();
+  </script>
+</body>
+</html>
